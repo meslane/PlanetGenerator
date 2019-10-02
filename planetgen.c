@@ -145,7 +145,7 @@ void generateMap(int xSize, int ySize, int max, int seaLevel, int grad) {
 	}
 	
 	for (i = 0; i < 2; i++){
-		for (p = 0; p < (xSize * ySize); p++) { /* fill lone pixels with ocean */
+		for (p = 0; p < (xSize * ySize); p++) { /* fill lone pixels with ocean/land */
 			if (imData[p].g != 0 && imData[p].g != 255) {
 				if (imData[p - xSize].b == 128 && imData[p + xSize].b == 128) {
 					imData[p].b = 128;
@@ -154,6 +154,13 @@ void generateMap(int xSize, int ySize, int max, int seaLevel, int grad) {
 				if (imData[p - 1].b == 128 && imData[p + 1].b == 128) {
 					imData[p].b = 128;
 					imData[p].g = 0;
+				}
+			}
+			if (imData[p].b != 0 && imData[p].b != 255) {
+				if (imData[p - 1].g != 0 && imData[p + 1].g !=0 && 
+				imData[p - xSize].g != 0 && imData[p + xSize].g != 0 ) {
+					imData[p].b = 0;
+					imData[p].g = imData[p - 1].g;
 				}
 			}
 		}
