@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 #include <math.h>
 #include <time.h>
 
@@ -77,7 +76,6 @@ void generateBitmap(int width, int height, float dpi, const char* filename, pixe
 			}
 		}
 	}
-	
 	fclose(bitmap);
 }
 
@@ -94,7 +92,6 @@ double averageOfNeighbors (char** array, int xSize, int ySize, int x, int y, cha
 			}
 		}
 	}
-	
 	return (sum / members);
 }
 
@@ -114,13 +111,13 @@ void generateMap(char* filename, int size, char max, char seaLevel, char grad) {
 		randmap[i] = (char*) malloc(size * sizeof(char));
 	}
 	
-	for (x = 0; x < size; x++) { /* assign random values */
+	for (x = 0; x < size; x++) {
 		for (y = 0; y < size; y++) {
 			randmap[x][y] = rng(0, max);
 		}
 	}
 	
-	for (x = 0; x < size; x++) { /* average pixels by neighbors */ 
+	for (x = 0; x < size; x++) {
 		for (y = 0; y < size; y++) {
 			
 			avg = floor(averageOfNeighbors(randmap, size, size, x, y, grad));
@@ -130,7 +127,7 @@ void generateMap(char* filename, int size, char max, char seaLevel, char grad) {
 					imData[p].b = 128; /* draw ocean */
 				}
 				else {
-					imData[p].g = avg * 20;
+					imData[p].g = 160 + (20 * (avg - (max / 2))); /* draw land */
 				}
 			}
 			else { /* fill in outside of planet circle with space + stars */
@@ -226,7 +223,7 @@ void overlayClouds(char* filename, int size, char cloudMax, char cloudLevel, cha
 					cloudCleared = 1;
 				}
 				
-				if (averageOfNeighbors(randClouds, size, size, x, y, cloudGrad) >= cloudLevel) {
+				if (floor(averageOfNeighbors(randClouds, size, size, x, y, cloudGrad)) > cloudLevel) {
 					if (cloudCleared == 1) {
 						fseek(f, -3, SEEK_CUR); /* get new img data as opposed to the old */
 						fread(pixelData, 3, 1, f);
@@ -250,12 +247,19 @@ void overlayClouds(char* filename, int size, char cloudMax, char cloudLevel, cha
 		}
 		fseek(f, (size % 4), SEEK_CUR); /* skip padding bytes */
 	}
+	for (i = 0; i < size; i++) {
+		free(randClouds[i]);
+	}
+	free(randClouds);
 	fclose(f);
 }
 
-int main(void) {
+int main(int argc, char** argv) {
 	srand(time(0));
-	generateMap("map.bmp", 127, 16, 7, 8);
-	overlayClouds("map.bmp", 127, 16, 9, 3);
+	//generateMap("map.bmp", 127, 16, 7, 8);
+	//overlayClouds("map.bmp", 127, 16, 9, 3);
+	
+	generateMap("map.bmp", atoi(argv[1]), atoi(argv[2]), atoi(argv[3]), atoi(argv[4]));
+	overlayClouds("map.bmp", atoi(argv[1]), atoi(argv[5]), atoi(argv[6]), atoi(argv[7]));
 	return 0;
 }
